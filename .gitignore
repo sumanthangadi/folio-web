@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.production
+.env.local
+.env.*.local
+
+# Editor & OS
+.vscode/
+.DS_Store
+*.swp

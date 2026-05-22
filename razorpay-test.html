@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Razorpay Test</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+  <h1>Razorpay Minimal Test</h1>
+  <p>Key: rzp_test_SpwlVQQAi936QF</p>
+  <button id="pay" onclick="startPayment()">Pay ₹1 Test</button>
+  <pre id="log"></pre>
+
+  <script>
+    function log(msg) {
+      document.getElementById('log').textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    function startPayment() {
+      log('Starting payment...');
+      
+      var options = {
+        key: 'rzp_test_SpwlVQQAi936QF',
+        amount: 100, // ₹1 in paise
+        currency: 'INR',
+        name: 'Test Payment',
+        description: 'Testing Razorpay',
+        handler: function (response) {
+          log('SUCCESS! Payment ID: ' + response.razorpay_payment_id);
+          alert('Payment successful! ID: ' + response.razorpay_payment_id);
+        },
+        prefill: {
+          name: 'Test User',
+          email: 'test@example.com',
+        },
+        theme: { color: '#dc2626' },
+      };
+
+      log('Options: ' + JSON.stringify({key: options.key, amount: options.amount, currency: options.currency}));
+
+      try {
+        var rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response) {
+          log('FAILED: ' + JSON.stringify(response.error));
+        });
+        rzp.open();
+        log('Razorpay opened');
+      } catch(e) {
+        log('ERROR: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>
