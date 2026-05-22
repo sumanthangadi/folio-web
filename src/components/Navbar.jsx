@@ -23,10 +23,6 @@ export default function Navbar() {
           </a>
           <button className="btn-chrome-nav">Add to Chrome</button>
         </div>
-
-        <button className="mobile-menu-btn" aria-label="Menu">
-          <span /><span /><span />
-        </button>
       </div>
     </motion.nav>
   )

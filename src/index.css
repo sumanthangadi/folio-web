@@ -1446,9 +1446,6 @@ img {
     display: none;
   }
 
-  .mobile-menu-btn {
-    display: flex;
-  }
 
   .features-grid {
     grid-template-columns: 1fr;
