@@ -45,10 +45,15 @@ export default function Hero() {
           </motion.p>
 
           <motion.div className="hero-actions" variants={fadeUp}>
-            <button className="btn-primary">
+            <a
+              href="https://chromewebstore.google.com/detail/folio/ojmafjjjknkjgjpbcifjfgnkcmpnhgbb"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+            >
               <ChromeIcon />
               Add to Chrome — Free
-            </button>
+            </a>
             <Link to="/login" className="btn-ghost">
               Sign in
             </Link>

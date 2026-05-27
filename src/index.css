@@ -158,7 +158,8 @@ img {
   color: var(--text-primary);
 }
 
-.btn-chrome-nav {
+.navbar-links .btn-chrome-nav {
+  display: inline-block;
   padding: 8px 20px;
   border: 1px solid var(--accent);
   color: var(--accent);
@@ -169,7 +170,7 @@ img {
   letter-spacing: 0.01em;
 }
 
-.btn-chrome-nav:hover {
+.navbar-links .btn-chrome-nav:hover {
   background: var(--accent);
   color: white;
   box-shadow: 0 0 24px var(--accent-glow);

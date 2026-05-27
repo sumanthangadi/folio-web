@@ -21,7 +21,14 @@ export default function Navbar() {
           <a href="#features" onClick={(e) => { e.preventDefault(); scrollTo('features') }}>
             Features
           </a>
-          <button className="btn-chrome-nav">Add to Chrome</button>
+          <a
+            href="https://chromewebstore.google.com/detail/folio/ojmafjjjknkjgjpbcifjfgnkcmpnhgbb"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-chrome-nav"
+          >
+            Add to Chrome
+          </a>
         </div>
       </div>
     </motion.nav>
