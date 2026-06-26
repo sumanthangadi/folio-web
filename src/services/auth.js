@@ -20,11 +20,15 @@ export const AuthService = {
   },
 
   // Start Google OAuth flow using token-based flow (required for Appwrite SDK v13+)
-  async loginWithGoogleWeb(source = null) {
+  async loginWithGoogleWeb(source = null, extId = null) {
     try {
-      const successUrl = source
-        ? `${window.location.origin}/login?source=${source}`
-        : `${window.location.origin}/login`;
+      let successUrl = `${window.location.origin}/login`;
+      const queryParams = [];
+      if (source) queryParams.push(`source=${encodeURIComponent(source)}`);
+      if (extId) queryParams.push(`extId=${encodeURIComponent(extId)}`);
+      if (queryParams.length > 0) {
+        successUrl += `?${queryParams.join('&')}`;
+      }
       // createOAuth2Token is the new flow for Appwrite 1.5+ / SDK v25
       account.createOAuth2Token(
         'google',

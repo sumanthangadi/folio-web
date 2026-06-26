@@ -40,8 +40,8 @@ export default function Hero() {
           </motion.h1>
 
           <motion.p className="hero-subtext" variants={fadeUp}>
-            Folio replaces your new tab with a beautiful, organized bookmark
-            dashboard. One time. Yours forever.
+            Folio is a premium visual bookmark manager that transforms your browser's default start page. 
+            Organize your bookmarks beautifully with custom themes, wallpapers, and native browser sync.
           </motion.p>
 
           <motion.div className="hero-actions" variants={fadeUp}>

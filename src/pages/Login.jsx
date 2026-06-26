@@ -24,13 +24,19 @@ export default function Login() {
 
   const params = new URLSearchParams(window.location.search);
   const source = params.get('source');
+  const extId = params.get('extId');
+
+  if (extId) {
+    sessionStorage.setItem('folio_ext_id', extId);
+  }
 
   const handleLogin = async () => {
     setLoading(true)
     setError(null)
     try {
+      const currentExtId = extId || sessionStorage.getItem('folio_ext_id');
       // Pass source so it's preserved in the OAuth success redirect URL
-      await AuthService.loginWithGoogleWeb(source)
+      await AuthService.loginWithGoogleWeb(source, currentExtId)
     } catch (err) {
       console.error(err)
       setError('Failed to log in. Please try again.')
@@ -55,7 +61,11 @@ export default function Login() {
           setDebugStatus('Finalizing login...');
           try {
             await account.createSession(userId, secret);
-            window.history.replaceState({}, document.title, source ? `/login?source=${source}` : '/login');
+            const currentExtId = urlParams.get('extId') || sessionStorage.getItem('folio_ext_id');
+            const cleanUrl = source 
+              ? `/login?source=${source}${currentExtId ? `&extId=${currentExtId}` : ''}`
+              : '/login';
+            window.history.replaceState({}, document.title, cleanUrl);
           } catch (sessionErr) {
             console.warn('[Login] createSession error:', sessionErr.message);
           }
@@ -71,7 +81,8 @@ export default function Login() {
         }
         
         // Create a JWT so the extension can authenticate without cookie access
-        const EXTENSION_ID = 'lbondlpbeinmgjebicfanaoibhdibfei';
+        const storedExtId = sessionStorage.getItem('folio_ext_id');
+        const EXTENSION_ID = storedExtId || urlParams.get('extId') || 'lbondlpbeinmgjebicfanaoibhdibfei';
         try {
           const { account: acct } = await import('../lib/appwrite');
           const jwt = await acct.createJWT();
@@ -90,8 +101,12 @@ export default function Login() {
         } catch (jwtErr) {
           console.warn('[Login] Could not create JWT for extension:', jwtErr.message);
         }
-        
-        navigate('/login-success');
+        const currentExtId = storedExtId || urlParams.get('extId');
+        if (source === 'pay') {
+          navigate(currentExtId ? `/pay?extId=${currentExtId}` : '/pay');
+        } else {
+          navigate('/login-success');
+        }
         
       } catch (e) {
         const errMsg = e?.message || e?.toString() || 'Unknown error';
