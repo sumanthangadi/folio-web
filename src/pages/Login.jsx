@@ -86,16 +86,26 @@ export default function Login() {
         try {
           const { account: acct } = await import('../lib/appwrite');
           const jwt = await acct.createJWT();
-          // Send JWT + user info to extension
+          
+          // Also extract the long-lived session hash from Appwrite's localStorage fallback
+          // This is critical for browsers like Brave that block third-party cookies
+          let sessionHash = null;
+          try {
+            const cookieFallback = JSON.parse(localStorage.getItem('cookieFallback') || '{}');
+            sessionHash = cookieFallback[`a_session_6a007fab00241e1b5379`] || null;
+          } catch (_) {}
+
+          // Send JWT + session hash + user info to extension
           if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
             chrome.runtime.sendMessage(EXTENSION_ID, {
               type: 'SET_JWT',
               jwt: jwt.jwt,
+              session: sessionHash,  // long-lived session hash for cookie-free auth
               userId: user.$id,
               email: user.email,
               name: user.name,
             }, (response) => {
-              console.log('[Login] Extension notified with JWT', response);
+              console.log('[Login] Extension notified with JWT + session', response);
             });
           }
         } catch (jwtErr) {
