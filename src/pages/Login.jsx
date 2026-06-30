@@ -91,19 +91,15 @@ export default function Login() {
           // This is critical for browsers like Brave that block third-party cookies
           let sessionHash = null;
           try {
-            console.log('[Login] Raw localStorage:', { ...localStorage });
             const cookieFallbackVal = localStorage.getItem('cookieFallback');
-            console.log('[Login] cookieFallback raw value:', cookieFallbackVal);
             const cookieFallback = JSON.parse(cookieFallbackVal || '{}');
             sessionHash = cookieFallback[`a_session_6a007fab00241e1b5379`] || null;
-            console.log('[Login] Extracted session hash:', sessionHash);
           } catch (e) {
             console.warn('[Login] Failed to parse cookieFallback:', e);
           }
 
           // Send JWT + session hash + user info to extension
           if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-            console.log('[Login] Sending message to extension with ID:', EXTENSION_ID);
             chrome.runtime.sendMessage(EXTENSION_ID, {
               type: 'SET_JWT',
               jwt: jwt.jwt,
@@ -112,7 +108,8 @@ export default function Login() {
               email: user.email,
               name: user.name,
             }, (response) => {
-              console.log('[Login] Extension notified with JWT + session', response);
+              // Non-verbose confirmation
+              console.log('[Login] Extension auth transfer initiated');
             });
           }
         } catch (jwtErr) {
