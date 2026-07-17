@@ -71,7 +71,8 @@ export const AuthService = {
             userId: appwriteUser.$id,
             name: appwriteUser.name || '',
             email: appwriteUser.email,
-            loginDate: new Date().toISOString()
+            loginDate: new Date().toISOString(),
+            trial_start: appwriteUser.trial_start || new Date().toISOString()
           }
         );
         return;
@@ -86,6 +87,7 @@ export const AuthService = {
               name: appwriteUser.name || '',
               email: appwriteUser.email,
               loginDate: new Date().toISOString(),
+              trial_start: new Date().toISOString(),
               paid: false
             }
           );

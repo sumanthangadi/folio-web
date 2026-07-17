@@ -132,6 +132,7 @@ export default function Admin() {
           name: user.name || '',
           email: user.email || '',
           loginDate: user.loginDate || new Date().toISOString(),
+          trial_start: user.trial_start || new Date().toISOString(),
           paid: newPaidStatus,
           paidAt: newPaidStatus ? new Date().toISOString() : null
         }
