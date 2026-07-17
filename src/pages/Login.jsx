@@ -23,8 +23,8 @@ export default function Login() {
   const navigate = useNavigate()
 
   const params = new URLSearchParams(window.location.search);
-  const source = params.get('source');
-  const extId = params.get('extId');
+  const source = params.get('source') || sessionStorage.getItem('folio_login_source');
+  const extId = params.get('extId') || sessionStorage.getItem('folio_ext_id');
 
   if (extId) {
     sessionStorage.setItem('folio_ext_id', extId);
@@ -115,11 +115,12 @@ export default function Login() {
         } catch (jwtErr) {
           console.warn('[Login] Could not create JWT for extension:', jwtErr.message);
         }
-        const currentExtId = storedExtId || urlParams.get('extId');
+        const currentExtId = storedExtId || urlParams.get('extId') || sessionStorage.getItem('folio_ext_id');
+        sessionStorage.removeItem('folio_login_source');
         if (source === 'pay') {
           navigate(currentExtId ? `/pay?extId=${currentExtId}` : '/pay');
-        } else if (source === 'admin') {
-          navigate('/admin');
+        } else if (source === 'admin-x3010' || source === 'admin') {
+          navigate('/admin-x3010');
         } else {
           navigate('/login-success');
         }

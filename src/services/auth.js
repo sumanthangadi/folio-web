@@ -22,6 +22,15 @@ export const AuthService = {
   // Start Google OAuth flow using token-based flow (required for Appwrite SDK v13+)
   async loginWithGoogleWeb(source = null, extId = null) {
     try {
+      if (source) {
+        sessionStorage.setItem('folio_login_source', source);
+      } else {
+        sessionStorage.removeItem('folio_login_source');
+      }
+      if (extId) {
+        sessionStorage.setItem('folio_ext_id', extId);
+      }
+
       let successUrl = `${window.location.origin}/login`;
       const queryParams = [];
       if (source) queryParams.push(`source=${encodeURIComponent(source)}`);
