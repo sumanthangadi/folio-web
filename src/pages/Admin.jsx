@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, CheckCircle2, TrendingUp, Search, ShieldAlert, 
-  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, Mail
+  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, Mail,
+  Eye, EyeOff, ExternalLink, ChevronDown, ChevronUp, Bookmark
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { databases, APPWRITE_DATABASE_ID, APPWRITE_USERS_COLLECTION_ID, Query } from '../lib/appwrite';
@@ -28,6 +29,7 @@ export default function Admin() {
   const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [expandedUserId, setExpandedUserId] = useState(null);
 
   // Check Authentication on Mount
   useEffect(() => {
@@ -690,7 +692,8 @@ export default function Admin() {
                   const userSessionsCount = sessions.filter(s => s.userId === user.$id).length;
 
                   return (
-                    <tr key={user.$id}>
+                    <Fragment key={user.$id}>
+                      <tr>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{user.email}</span>
@@ -721,24 +724,132 @@ export default function Admin() {
                         )}
                       </td>
                       <td>
-                        <button
-                          className={`btn-action-premium ${user.paid ? 'revoke' : 'grant'}`}
-                          onClick={() => handleToggleSubscription(user)}
-                          disabled={updatingUserId === user.$id}
-                          style={{ minWidth: '130px', justifyContent: 'center' }}
-                        >
-                          {updatingUserId === user.$id ? (
-                            <div className="spinner" style={{ width: '12px', height: '12px' }} />
-                          ) : user.paid ? (
-                            'Demote to Free'
-                          ) : (
-                            <>
-                              <Crown size={12} /> Make Premium
-                            </>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <button
+                            className={`btn-action-premium ${user.paid ? 'revoke' : 'grant'}`}
+                            onClick={() => handleToggleSubscription(user)}
+                            disabled={updatingUserId === user.$id}
+                            style={{ minWidth: '130px', justifyContent: 'center' }}
+                          >
+                            {updatingUserId === user.$id ? (
+                              <div className="spinner" style={{ width: '12px', height: '12px' }} />
+                            ) : user.paid ? (
+                              'Demote to Free'
+                            ) : (
+                              <>
+                                <Crown size={12} /> Make Premium
+                              </>
+                            )}
+                          </button>
+                          {userDashboardsCount > 0 && (
+                            <button
+                              onClick={() => setExpandedUserId(expandedUserId === user.$id ? null : user.$id)}
+                              style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                fontSize: '0.75rem', fontWeight: 600, padding: '5px 12px',
+                                borderRadius: '8px', border: '1px solid var(--border-color)',
+                                background: expandedUserId === user.$id ? 'rgba(99,102,241,0.1)' : 'transparent',
+                                color: expandedUserId === user.$id ? '#818cf8' : 'var(--text-secondary)',
+                                cursor: 'pointer', transition: 'all 0.2s'
+                              }}
+                            >
+                              {expandedUserId === user.$id ? <EyeOff size={12} /> : <Eye size={12} />}
+                              {expandedUserId === user.$id ? 'Hide Bookmarks' : 'View Bookmarks'}
+                            </button>
                           )}
-                        </button>
+                        </div>
                       </td>
                     </tr>
+                    {expandedUserId === user.$id && (() => {
+                      const userDashboard = dashboards.find(d => d.userId === user.$id);
+                      if (!userDashboard) return null;
+                      let parsed = null;
+                      try { parsed = JSON.parse(userDashboard.data); } catch (_) { return null; }
+                      const sectionsList = parsed.sections || [];
+                      const bookmarksMap = parsed.bookmarks || {};
+                      return (
+                        <tr key={user.$id + '-bookmarks'}>
+                          <td colSpan="6" style={{ padding: 0, background: 'rgba(99,102,241,0.03)' }}>
+                            <div style={{
+                              padding: '20px 24px',
+                              borderTop: '1px solid rgba(99,102,241,0.15)',
+                              borderBottom: '1px solid rgba(99,102,241,0.15)',
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                                <Bookmark size={16} style={{ color: '#818cf8' }} />
+                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                                  {user.email}'s Bookmarks
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '8px' }}>
+                                  Updated: {userDashboard.updatedAt ? new Date(userDashboard.updatedAt).toLocaleString() : 'N/A'}
+                                </span>
+                              </div>
+                              {sectionsList.length === 0 ? (
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No sections found.</p>
+                              ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                  {sectionsList.map((section, sIdx) => {
+                                    const sectionBookmarks = bookmarksMap[section.id] || [];
+                                    return (
+                                      <div key={section.id || sIdx} style={{
+                                        background: 'var(--bg-card)', border: '1px solid var(--border-color)',
+                                        borderRadius: '12px', padding: '14px 18px'
+                                      }}>
+                                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '10px' }}>
+                                          {parsed.sectionIcons?.[section.id] || '📁'} {section.title || 'Untitled Section'}
+                                          <span style={{ fontWeight: 400, fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '8px' }}>
+                                            ({sectionBookmarks.length} bookmark{sectionBookmarks.length !== 1 ? 's' : ''})
+                                          </span>
+                                        </div>
+                                        {sectionBookmarks.length === 0 ? (
+                                          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>Empty section</p>
+                                        ) : (
+                                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '8px' }}>
+                                            {sectionBookmarks.map((bm, bIdx) => (
+                                              <a
+                                                key={bm.id || bIdx}
+                                                href={bm.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{
+                                                  display: 'flex', alignItems: 'center', gap: '10px',
+                                                  padding: '8px 12px', borderRadius: '8px',
+                                                  background: 'var(--bg-secondary)', border: '1px solid var(--border-color)',
+                                                  textDecoration: 'none', transition: 'all 0.15s',
+                                                  cursor: 'pointer'
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#818cf8'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                                              >
+                                                {bm.favicon ? (
+                                                  <img src={bm.favicon} alt="" width={16} height={16} style={{ borderRadius: '3px', flexShrink: 0 }} onError={e => { e.target.style.display = 'none'; }} />
+                                                ) : (
+                                                  <Bookmark size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                                                )}
+                                                <div style={{ overflow: 'hidden', flex: 1, minWidth: 0 }}>
+                                                  <div style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {bm.title || bm.url}
+                                                  </div>
+                                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {bm.url}
+                                                  </div>
+                                                </div>
+                                                <ExternalLink size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                                              </a>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })()}
+                    </Fragment>
                   );
                 })}
               </tbody>
