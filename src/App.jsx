@@ -24,7 +24,7 @@ function App() {
           <Route path="/pay" element={<Pay />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin-x3010" element={<Admin />} />
         </Routes>
       </AnimatePresence>
     </>

@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, CheckCircle2, TrendingUp, Search, ShieldAlert, 
-  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, ShieldCheck, Mail
+  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, Mail
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { account, databases, APPWRITE_DATABASE_ID, APPWRITE_USERS_COLLECTION_ID, Query } from '../lib/appwrite';
+import { Link } from 'react-router-dom';
+import { databases, APPWRITE_DATABASE_ID, APPWRITE_USERS_COLLECTION_ID, Query } from '../lib/appwrite';
 import { AuthService } from '../services/auth';
 
 const ADMIN_EMAILS = ['sumanthangadi7@gmail.com'];
@@ -19,8 +19,6 @@ const pageTransition = {
 export default function Admin() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [bypass, setBypass] = useState(false);
-  const [isLocal, setIsLocal] = useState(false);
 
   // Data states
   const [users, setUsers] = useState([]);
@@ -30,15 +28,6 @@ export default function Admin() {
   const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingUserId, setUpdatingUserId] = useState(null);
-
-  const navigate = useNavigate();
-
-  // Check if running locally
-  useEffect(() => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      setIsLocal(true);
-    }
-  }, []);
 
   // Check Authentication on Mount
   useEffect(() => {
@@ -106,15 +95,15 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    if (currentUser && (ADMIN_EMAILS.includes(currentUser.email) || bypass)) {
+    if (currentUser && ADMIN_EMAILS.includes(currentUser.email)) {
       fetchData();
     }
-  }, [currentUser, bypass]);
+  }, [currentUser]);
 
   // Google Login initiation
   const handleAdminLogin = async () => {
     try {
-      await AuthService.loginWithGoogleWeb('admin');
+      await AuthService.loginWithGoogleWeb('admin-x3010');
     } catch (e) {
       console.error(e);
       setErrorMsg('Failed to initiate login flow.');
@@ -125,7 +114,6 @@ export default function Admin() {
   const handleSignOut = async () => {
     await AuthService.logout();
     setCurrentUser(null);
-    setBypass(false);
   };
 
   // Toggle paid/subscription status
@@ -214,11 +202,6 @@ export default function Admin() {
             <button className="btn-primary" onClick={handleAdminLogin}>
               Sign in with Google
             </button>
-            {isLocal && (
-              <button className="btn-bypass" onClick={() => setBypass(true)}>
-                Local Dev Bypass
-              </button>
-            )}
             <Link to="/" className="back-link-admin">
               <ArrowLeft size={14} /> Back to Home
             </Link>
@@ -229,7 +212,7 @@ export default function Admin() {
   }
 
   // Render Access Denied screen
-  if (!ADMIN_EMAILS.includes(currentUser.email) && !bypass) {
+  if (!ADMIN_EMAILS.includes(currentUser.email)) {
     return (
       <motion.div className="admin-page" {...pageTransition}>
         <div className="admin-card-container">
@@ -245,11 +228,6 @@ export default function Admin() {
               <button className="btn-ghost" onClick={handleSignOut}>
                 <LogOut size={14} /> Log Out
               </button>
-              {isLocal && (
-                <button className="btn-bypass" onClick={() => setBypass(true)}>
-                  Bypass (Local Dev)
-                </button>
-              )}
             </div>
             <Link to="/" className="back-link-admin" style={{ marginTop: '20px' }}>
               <ArrowLeft size={14} /> Back to Home
@@ -323,20 +301,6 @@ export default function Admin() {
         }
         .back-link-admin:hover {
           color: var(--text-primary);
-        }
-        .btn-bypass {
-          padding: 10px 20px;
-          border-radius: 100px;
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: #f59e0b;
-          border: 1px dashed rgba(245, 158, 11, 0.3);
-          background: rgba(245, 158, 11, 0.05);
-          transition: all 0.2s;
-        }
-        .btn-bypass:hover {
-          background: rgba(245, 158, 11, 0.1);
-          border-color: #f59e0b;
         }
         .admin-loading-container {
           min-height: 100vh;
