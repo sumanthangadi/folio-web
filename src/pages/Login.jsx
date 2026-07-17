@@ -123,13 +123,6 @@ export default function Login() {
           navigate('/admin-x3010');
         } else {
           setShowSuccessModal(true);
-          setTimeout(() => {
-            try {
-              window.close();
-            } catch (err) {
-              console.warn('Failed to close window:', err);
-            }
-          }, 3500);
         }
         
       } catch (e) {

@@ -136,13 +136,6 @@ export default function Pay() {
           // Show payment success modal
           setShowPaymentSuccessModal(true)
           setLoading(false)
-          setTimeout(() => {
-            try {
-              window.close()
-            } catch (err) {
-              console.warn('Failed to close window:', err)
-            }
-          }, 4500)
         } catch (err) {
           console.error(err)
           setError('Payment verification failed. Please contact support.')
