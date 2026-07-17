@@ -3,7 +3,6 @@ import { AnimatePresence } from 'framer-motion'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Pay from './pages/Pay'
-import LoginSuccess from './pages/LoginSuccess'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Admin from './pages/Admin'
@@ -20,7 +19,6 @@ function App() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/login-success" element={<LoginSuccess />} />
           <Route path="/pay" element={<Pay />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />

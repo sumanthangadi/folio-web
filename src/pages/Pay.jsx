@@ -32,6 +32,7 @@ export default function Pay() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [showPaymentSuccessModal, setShowPaymentSuccessModal] = useState(false)
 
   useEffect(() => {
     // Load Razorpay script
@@ -132,8 +133,16 @@ export default function Pay() {
             chrome.runtime.sendMessage(EXTENSION_ID, { type: 'PAYMENT_SUCCESS' })
           }
 
-          // Redirect to success page
-          window.location.href = '/login-success'
+          // Show payment success modal
+          setShowPaymentSuccessModal(true)
+          setLoading(false)
+          setTimeout(() => {
+            try {
+              window.close()
+            } catch (err) {
+              console.warn('Failed to close window:', err)
+            }
+          }, 4500)
         } catch (err) {
           console.error(err)
           setError('Payment verification failed. Please contact support.')
@@ -355,6 +364,74 @@ export default function Pay() {
           </p>
         </motion.div>
       </div>
+
+      {showPaymentSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{
+              background: '#0d0d0d',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
+              borderRadius: '24px',
+              padding: '40px',
+              maxWidth: '440px',
+              textAlign: 'center',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5), 0 0 30px rgba(34, 197, 94, 0.1)'
+            }}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(34, 197, 94, 0.1)',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              color: '#22c55e'
+            }}>
+              <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>Payment Successful!</h3>
+            <p style={{ fontSize: '0.95rem', color: '#a3a3a3', lineHeight: '1.6', marginBottom: '24px' }}>
+              Your lifetime premium license has been activated. Head back to the extension to start enjoying your premium features.
+            </p>
+            <button 
+              onClick={() => window.close()}
+              style={{
+                background: '#22c55e',
+                color: '#fff',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '100px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                width: '100%'
+              }}
+            >
+              Close Tab
+            </button>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   )
 }

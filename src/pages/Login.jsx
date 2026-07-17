@@ -15,11 +15,11 @@ const fadeUp = {
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
 }
-
 export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [debugStatus, setDebugStatus] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const navigate = useNavigate()
 
   const params = new URLSearchParams(window.location.search);
@@ -122,7 +122,14 @@ export default function Login() {
         } else if (source === 'admin-x3010' || source === 'admin') {
           navigate('/admin-x3010');
         } else {
-          navigate('/login-success');
+          setShowSuccessModal(true);
+          setTimeout(() => {
+            try {
+              window.close();
+            } catch (err) {
+              console.warn('Failed to close window:', err);
+            }
+          }, 3500);
         }
         
       } catch (e) {
@@ -210,6 +217,74 @@ export default function Login() {
           </p>
         </motion.div>
       </div>
+
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            style={{
+              background: '#0d0d0d',
+              border: '1px solid rgba(220, 38, 38, 0.25)',
+              borderRadius: '24px',
+              padding: '40px',
+              maxWidth: '440px',
+              textAlign: 'center',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5), 0 0 30px rgba(220, 38, 38, 0.1)'
+            }}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(220, 38, 38, 0.1)',
+              border: '1px solid rgba(220, 38, 38, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              color: '#dc2626'
+            }}>
+              <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>Login Successful!</h3>
+            <p style={{ fontSize: '0.95rem', color: '#a3a3a3', lineHeight: '1.6', marginBottom: '24px' }}>
+              Your Google account is now linked with Folio. You can safely close this tab or return to the extension.
+            </p>
+            <button 
+              onClick={() => window.close()}
+              style={{
+                background: '#dc2626',
+                color: '#fff',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '100px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                width: '100%'
+              }}
+            >
+              Close Tab
+            </button>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   )
 }
