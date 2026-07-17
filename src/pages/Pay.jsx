@@ -164,67 +164,69 @@ export default function Pay() {
 
   return (
     <motion.div className="pay-page" {...pageTransition}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-        maxWidth: '1200px',
-        margin: '0 auto 24px',
-        padding: '0 24px'
-      }}>
-        <Link to="/" className="back-link" style={{ margin: 0 }}>
-          <ArrowLeft size={16} />
-          Back
-        </Link>
+      <Link to="/" className="back-link">
+        <ArrowLeft size={16} />
+        Back
+      </Link>
 
-        {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Logged in as <strong style={{ color: 'var(--text-primary)' }}>{user.email}</strong>
-            </span>
-            <button 
-              onClick={async () => {
-                await AuthService.logout();
-                setUser(null);
-              }}
-              style={{
-                fontSize: '0.8rem',
-                color: '#dc2626',
-                border: '1px solid rgba(220,38,38,0.2)',
-                padding: '4px 12px',
-                borderRadius: '100px',
-                background: 'rgba(220,38,38,0.05)',
-                fontWeight: 600,
-                transition: 'all 0.2s'
-              }}
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleLogin}
-            disabled={loading}
+      {user ? (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '24px',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Logged in as <strong style={{ color: 'var(--text-primary)' }}>{user.email}</strong>
+          </span>
+          <button 
+            onClick={async () => {
+              await AuthService.logout();
+              setUser(null);
+            }}
             style={{
-              fontSize: '0.85rem',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-light)',
-              padding: '6px 16px',
+              fontSize: '0.8rem',
+              color: '#dc2626',
+              border: '1px solid rgba(220,38,38,0.2)',
+              padding: '4px 12px',
               borderRadius: '100px',
-              background: 'rgba(255,255,255,0.02)',
+              background: 'rgba(220,38,38,0.05)',
               fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
               transition: 'all 0.2s'
             }}
           >
-            <GoogleIcon />
-            Sign In
+            Sign Out
           </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            zIndex: 50,
+            fontSize: '0.85rem',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-light)',
+            padding: '6px 16px',
+            borderRadius: '100px',
+            background: 'rgba(255,255,255,0.02)',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <GoogleIcon />
+          Sign In
+        </button>
+      )}
 
       <div className="pay-layout">
         <motion.div className="pay-info" variants={stagger} initial="initial" animate="animate">
