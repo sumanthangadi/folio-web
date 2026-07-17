@@ -53,6 +53,15 @@ export const AuthService = {
           APPWRITE_USERS_COLLECTION_ID,
           appwriteUser.$id
         );
+        // User exists: update document to record activity and refresh $updatedAt
+        await databases.updateDocument(
+          APPWRITE_DATABASE_ID,
+          APPWRITE_USERS_COLLECTION_ID,
+          appwriteUser.$id,
+          {
+            email: appwriteUser.email
+          }
+        );
         return;
       } catch (e) {
         if (e.code === 404) {

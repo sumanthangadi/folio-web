@@ -118,6 +118,8 @@ export default function Login() {
         const currentExtId = storedExtId || urlParams.get('extId');
         if (source === 'pay') {
           navigate(currentExtId ? `/pay?extId=${currentExtId}` : '/pay');
+        } else if (source === 'admin') {
+          navigate('/admin');
         } else {
           navigate('/login-success');
         }
