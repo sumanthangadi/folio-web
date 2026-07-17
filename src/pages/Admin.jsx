@@ -126,6 +126,10 @@ export default function Admin() {
         APPWRITE_USERS_COLLECTION_ID,
         user.$id,
         {
+          userId: user.userId || user.$id,
+          name: user.name || '',
+          email: user.email || '',
+          loginDate: user.loginDate || new Date().toISOString(),
           paid: newPaidStatus,
           paidAt: newPaidStatus ? new Date().toISOString() : null
         }
@@ -152,8 +156,8 @@ export default function Admin() {
     let mau = 0;
 
     users.forEach(u => {
-      // Use $updatedAt or u.trial_start or $createdAt as active timestamp
-      const activeTimestamp = u.$updatedAt || u.trial_start || u.$createdAt;
+      // Use $updatedAt or u.loginDate or $createdAt as active timestamp
+      const activeTimestamp = u.$updatedAt || u.loginDate || u.$createdAt;
       if (!activeTimestamp) return;
 
       const diffMs = now - new Date(activeTimestamp);
@@ -694,7 +698,7 @@ export default function Admin() {
                         </div>
                       </td>
                       <td style={{ color: 'var(--text-secondary)' }}>
-                        {user.trial_start ? new Date(user.trial_start).toLocaleDateString() : 'N/A'}
+                        {user.loginDate ? new Date(user.loginDate).toLocaleDateString() : 'N/A'}
                       </td>
                       <td style={{ color: 'var(--text-secondary)' }}>
                         {user.$updatedAt ? new Date(user.$updatedAt).toLocaleString() : 'N/A'}
