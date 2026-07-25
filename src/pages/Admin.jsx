@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, CheckCircle2, TrendingUp, Search, ShieldAlert, 
-  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, Mail
+  Crown, LogOut, ArrowLeft, RefreshCw, BarChart2, Mail,
+  Eye, EyeOff, ExternalLink, Folder, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { databases, APPWRITE_DATABASE_ID, APPWRITE_USERS_COLLECTION_ID, Query } from '../lib/appwrite';
@@ -28,6 +29,7 @@ export default function Admin() {
   const [errorMsg, setErrorMsg] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [updatingUserId, setUpdatingUserId] = useState(null);
+  const [expandedUserId, setExpandedUserId] = useState(null);
 
   // Check Authentication on Mount
   useEffect(() => {
@@ -142,6 +144,24 @@ export default function Admin() {
       alert('Failed to update subscription status. Please check your document permissions.');
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  // Parse a user's dashboard data into { sections, bookmarks }
+  const getUserBookmarks = (userId) => {
+    const dashboard = dashboards.find(d => d.userId === userId);
+    if (!dashboard || !dashboard.data) return null;
+    try {
+      const parsed = JSON.parse(dashboard.data);
+      return {
+        sections: parsed.sections || [],
+        bookmarks: parsed.bookmarks || [],
+        sectionIcons: parsed.sectionIcons || {},
+        updatedAt: dashboard.updatedAt
+      };
+    } catch (e) {
+      console.error('Failed to parse dashboard data for', userId, e);
+      return null;
     }
   };
 
@@ -569,6 +589,135 @@ export default function Admin() {
           color: var(--text-primary);
         }
         
+        /* Bookmarks Viewer Panel */
+        .bookmarks-panel {
+          background: rgba(10, 10, 10, 0.6);
+          border-top: 1px solid var(--border);
+          padding: 24px 32px;
+        }
+        .bookmarks-panel-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 20px;
+        }
+        .bookmarks-panel-header h3 {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .bookmarks-panel-header .sync-time {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          font-weight: 400;
+        }
+        .bookmarks-sections-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 16px;
+        }
+        .bm-section-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .bm-section-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border);
+        }
+        .bm-section-title .bm-count {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--text-muted);
+          background: rgba(255,255,255,0.04);
+          padding: 2px 8px;
+          border-radius: 100px;
+          margin-left: auto;
+        }
+        .bm-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px 8px;
+          border-radius: 10px;
+          transition: background 0.15s;
+          text-decoration: none;
+        }
+        .bm-item:hover {
+          background: rgba(255, 255, 255, 0.04);
+        }
+        .bm-favicon {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          flex-shrink: 0;
+          background: rgba(255,255,255,0.05);
+        }
+        .bm-item-title {
+          font-size: 0.82rem;
+          color: var(--text-secondary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex: 1;
+          min-width: 0;
+        }
+        .bm-item:hover .bm-item-title {
+          color: var(--text-primary);
+        }
+        .bm-item .bm-ext-icon {
+          flex-shrink: 0;
+          color: var(--text-muted);
+          opacity: 0;
+          transition: opacity 0.15s;
+        }
+        .bm-item:hover .bm-ext-icon {
+          opacity: 1;
+        }
+        .bm-empty {
+          font-size: 0.82rem;
+          color: var(--text-muted);
+          font-style: italic;
+          padding: 8px;
+        }
+        .btn-view-bookmarks {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 12px;
+          border-radius: 100px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          border: 1px solid var(--border);
+          color: var(--text-secondary);
+          background: transparent;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-view-bookmarks:hover {
+          background: rgba(255,255,255,0.05);
+          color: var(--text-primary);
+          border-color: var(--border-light);
+        }
+        .btn-view-bookmarks.active {
+          background: var(--accent-soft);
+          border-color: rgba(220, 38, 38, 0.25);
+          color: var(--accent-hover);
+        }
+
         .flex-row {
           display: flex;
           align-items: center;
@@ -691,7 +840,8 @@ export default function Admin() {
                   const userSessionsCount = sessions.filter(s => s.userId === user.$id).length;
 
                   return (
-                    <tr key={user.$id}>
+                    <React.Fragment key={user.$id}>
+                    <tr>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{user.email}</span>
@@ -705,9 +855,20 @@ export default function Admin() {
                         {user.$updatedAt ? new Date(user.$updatedAt).toLocaleString() : 'N/A'}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                           <span>Bookmarks Layout: <strong>{userDashboardsCount}</strong></span>
                           <span>Sessions: <strong>{userSessionsCount}</strong></span>
+                          {userDashboardsCount > 0 && (
+                            <button
+                              className={`btn-view-bookmarks ${expandedUserId === user.$id ? 'active' : ''}`}
+                              onClick={() => setExpandedUserId(expandedUserId === user.$id ? null : user.$id)}
+                              style={{ marginTop: '4px' }}
+                            >
+                              {expandedUserId === user.$id ? <EyeOff size={12} /> : <Eye size={12} />}
+                              {expandedUserId === user.$id ? 'Hide Bookmarks' : 'View Bookmarks'}
+                              {expandedUserId === user.$id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                            </button>
+                          )}
                         </div>
                       </td>
                       <td>
@@ -740,6 +901,86 @@ export default function Admin() {
                         </button>
                       </td>
                     </tr>
+                    {/* Expanded Bookmarks Panel */}
+                    {expandedUserId === user.$id && (() => {
+                      const data = getUserBookmarks(user.$id);
+                      if (!data) return (
+                        <tr key={`${user.$id}-bm`}>
+                          <td colSpan={6} className="bookmarks-panel">
+                            <p className="bm-empty">No bookmark data found for this user.</p>
+                          </td>
+                        </tr>
+                      );
+                      const { sections, bookmarks, sectionIcons, updatedAt } = data;
+                      return (
+                        <tr key={`${user.$id}-bm`}>
+                          <td colSpan={6} className="bookmarks-panel">
+                            <div className="bookmarks-panel-header">
+                              <h3>
+                                <Folder size={16} />
+                                {user.email}'s Bookmarks
+                              </h3>
+                              <span className="sync-time">
+                                Last synced: {updatedAt ? new Date(updatedAt).toLocaleString() : 'N/A'}
+                              </span>
+                            </div>
+                            {sections.length === 0 ? (
+                              <p className="bm-empty">No sections found.</p>
+                            ) : (
+                              <div className="bookmarks-sections-grid">
+                                {sections
+                                  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                                  .map(section => {
+                                    const sectionBookmarks = bookmarks.filter(b => b.sectionId === section.id);
+                                    return (
+                                      <div key={section.id} className="bm-section-card">
+                                        <div className="bm-section-title">
+                                          <Folder size={14} />
+                                          {section.name}
+                                          <span className="bm-count">{sectionBookmarks.length}</span>
+                                        </div>
+                                        {sectionBookmarks.length === 0 ? (
+                                          <span className="bm-empty">Empty section</span>
+                                        ) : (
+                                          sectionBookmarks.map(bm => {
+                                            let faviconUrl;
+                                            try {
+                                              const urlObj = new URL(bm.url);
+                                              faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=32`;
+                                            } catch {
+                                              faviconUrl = null;
+                                            }
+                                            return (
+                                              <a
+                                                key={bm.id}
+                                                href={bm.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="bm-item"
+                                              >
+                                                {faviconUrl ? (
+                                                  <img src={faviconUrl} alt="" className="bm-favicon" />
+                                                ) : (
+                                                  <div className="bm-favicon" />
+                                                )}
+                                                <span className="bm-item-title" title={bm.url}>
+                                                  {bm.title || bm.url}
+                                                </span>
+                                                <ExternalLink size={12} className="bm-ext-icon" />
+                                              </a>
+                                            );
+                                          })
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })()}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
